@@ -96,15 +96,15 @@ html,body{
   font-family:'Playfair Display',serif;
   font-style:italic;
   font-size:clamp(1rem,4.5vw,1.8rem);
-  color:#fce8ff;
-  text-shadow:0 0 24px rgba(220,140,255,.8),0 2px 8px rgba(0,0,0,.6);
+  color:#fafafa;
+  text-shadow:0 0 24px rgba(53, 53, 53, 0.8),0 2px 8px rgba(0,0,0,.6);
   line-height:1.4;
   margin-bottom:6px;
 }
 .hsub{
-  font-size:clamp(.75rem,3.2vw,1rem);
+  font-size:clamp(.85rem,3.2vw,1rem);
   font-style:italic;font-weight:300;
-  color:rgba(235,190,255,.65);
+  color:rgb(255, 255, 255);
   letter-spacing:.05em;line-height:1.5;
 }
 .hsub em{color:#f0c8ff;font-style:italic;}
@@ -176,6 +176,7 @@ html,body{
   opacity:0;
   animation:grow var(--gd,.9s) cubic-bezier(.34,1.56,.64,1) forwards var(--gdel,0s);
   z-index:var(--fz,6);
+  will-change:transform,opacity;
 }
 @keyframes grow{
   from{opacity:0;transform:scaleY(0)}
@@ -209,6 +210,7 @@ html,body{
 /* HEAD */
 .fhead{
   position:relative;flex-shrink:0;
+  will-change:transform;
   animation:
     sway var(--swd,4s) ease-in-out infinite var(--swdel,0s),
     bloom var(--bd2,.7s) ease forwards var(--bdel,.5s);
@@ -277,7 +279,13 @@ html,body{
 }
 @keyframes budP{from{transform:scale(.88);filter:brightness(.88)}to{transform:scale(1.12);filter:brightness(1.2)}}
 
-/* SPARKLE */
+/* Reduce heavy effects on mobile */
+@media(max-width:768px){
+  .petal{filter:none;}
+  .orb{filter:blur(50px);}
+  .moon{box-shadow:0 0 20px 8px rgba(245,208,96,.2);}
+  .ff{display:none;}
+}
 .spark{
   position:fixed;pointer-events:none;z-index:30;
   font-size:var(--ss,13px);color:var(--sc,#ffd700);
@@ -326,41 +334,43 @@ html,body{
 </div>
 
 <script>
+function r(a,b){return Math.round(Math.random()*(b-a)+a);}
+function rnd(a,b){return Math.random()*(b-a)+a;}
+function pick(a){return a[Math.floor(Math.random()*a.length)];}
+
+const isMobile=window.innerWidth<=768;
+const W=window.innerWidth;
+const H=window.innerHeight;
+const groundH=Math.min(90,Math.max(55,H*.11));
+
 // Stars
 const starsEl=document.getElementById('stars');
-for(let i=0;i<120;i++){
+const starCount=isMobile?40:100;
+for(let i=0;i<starCount;i++){
   const s=document.createElement('div');s.className='star';
   const sz=Math.random()*2+.4;
-  s.style.cssText=`width:${sz}px;height:${sz}px;top:${Math.random()*80}%;left:${Math.random()*100}%;--d:${(Math.random()*3+1.2).toFixed(1)}s;animation-delay:${(Math.random()*5).toFixed(1)}s`;
+  s.style.cssText=`width:${sz}px;height:${sz}px;top:${Math.random()*80}%;left:${Math.random()*100}%;--d:${(Math.random()*3+1.5).toFixed(1)}s;animation-delay:${(Math.random()*5).toFixed(1)}s`;
   starsEl.appendChild(s);
 }
 
 // Floating petals
 const fpe=document.getElementById('fpetals');
-['🌸','🌺','🌼','✿','❀','💮'].forEach(em=>{
-  for(let j=0;j<4;j++){
-    const p=document.createElement('div');p.className='fp';p.textContent=em;
-    p.style.cssText=`left:${Math.random()*100}%;--fs:${(Math.random()*7+8)}px;--fd:${(Math.random()*9+8).toFixed(1)}s;--fdel:${(Math.random()*14).toFixed(1)}s;--fdx:${(Math.random()*80-40).toFixed(0)}px`;
-    fpe.appendChild(p);
-  }
-});
-
-// Fireflies
-for(let i=0;i<14;i++){
-  const ff=document.createElement('div');ff.className='ff';
-  ff.style.cssText=`left:${Math.random()*90+5}%;top:${Math.random()*55+5}%;--t:${(Math.random()*7+5).toFixed(1)}s;--x1:${r(-50,50)}px;--y1:${r(-40,40)}px;--x2:${r(-50,50)}px;--y2:${r(-40,40)}px;--x3:${r(-50,50)}px;--y3:${r(-40,40)}px;animation-delay:${(Math.random()*6).toFixed(1)}s`;
-  document.body.appendChild(ff);
+const petalEmojis=['🌸','🌺','🌼','✿','❀','💮'];
+const petalCount=isMobile?6:20;
+for(let i=0;i<petalCount;i++){
+  const p=document.createElement('div');p.className='fp';
+  p.textContent=petalEmojis[i%petalEmojis.length];
+  p.style.cssText=`left:${Math.random()*50}%;--fs:${(Math.random()*6+8)}px;--fd:${(Math.random()*10+10).toFixed(1)}s;--fdel:${(Math.random()*18).toFixed(1)}s;--fdx:${(Math.random()*80-40).toFixed(0)}px`;
+  fpe.appendChild(p);
 }
 
-function r(a,b){return Math.round(Math.random()*(b-a)+a);}
-function rnd(a,b){return Math.random()*(b-a)+a;}
-function pick(a){return a[Math.floor(Math.random()*a.length)];}
-
-// Detect mobile
-const isMobile=window.innerWidth<=600;
-const W=window.innerWidth;
-const H=window.innerHeight;
-const groundH=Math.min(90,Math.max(55,H*.11));
+// Fireflies — skip on low-end mobile
+const ffCount=isMobile?5:14;
+for(let i=0;i<ffCount;i++){
+  const ff=document.createElement('div');ff.className='ff';
+  ff.style.cssText=`left:${Math.random()*90+5}%;top:${Math.random()*55+5}%;--t:${(Math.random()*8+7).toFixed(1)}s;--x1:${r(-50,50)}px;--y1:${r(-40,40)}px;--x2:${r(-50,50)}px;--y2:${r(-40,40)}px;--x3:${r(-50,50)}px;--y3:${r(-40,40)}px;animation-delay:${(Math.random()*8).toFixed(1)}s`;
+  document.body.appendChild(ff);
+}
 
 // Palettes [color, glow, center1, center2]
 const pal={
@@ -513,7 +523,7 @@ function buildFlower(type,scale,colKey,delay){
 
 const garden=document.getElementById('garden');
 let total=0;
-const MAX=500;
+const MAX=isMobile?180:500;
 
 function spawnOne(delay){
   if(total>=MAX)return;
@@ -529,22 +539,37 @@ function spawnOne(delay){
   el.style.setProperty('--gdel',delay+'s');
   el.style.setProperty('--gd',rnd(.6,1.2).toFixed(2)+'s');
   el.style.bottom='0';
+  el.style.willChange='transform,opacity';
   if(Math.random()>.5) el.style.transform='scaleX(-1)';
 
   garden.appendChild(el);
   total++;
 }
 
-// Initial burst
-for(let i=0;i<180;i++) spawnOne(rnd(.1,9));
+// Staggered initial spawn — don't dump all at once on mobile
+const initCount=isMobile?80:180;
+const initSpread=isMobile?12:9;
 
-// Continuous waves
-function wave(){
-  const batch=r(5,14);
-  for(let i=0;i<batch;i++) setTimeout(()=>spawnOne(rnd(0,1.2)),i*rnd(50,220));
-  setTimeout(wave, total<250?rnd(700,1300):rnd(1200,2600));
+// Batch via setTimeout so main thread isn't blocked
+function spawnBatch(start,end,spreadSecs){
+  for(let i=start;i<end;i++){
+    const idx=i;
+    setTimeout(()=>{
+      spawnOne(rnd(0.1, spreadSecs));
+    }, idx * (isMobile?60:20));
+  }
 }
-setTimeout(wave,9500);
+spawnBatch(0, initCount, initSpread);
+
+// Continuous waves — slower on mobile
+function wave(){
+  const batch=isMobile?r(3,7):r(5,14);
+  for(let i=0;i<batch;i++) setTimeout(()=>spawnOne(rnd(0,1.2)),i*rnd(80,280));
+  const next=total<(MAX*.6)?rnd(1200,2000):rnd(2000,3800);
+  setTimeout(wave,next);
+}
+const waveStart=isMobile?13000:9500;
+setTimeout(wave,waveStart);
 
 // Touch/click sparkle
 function doSparkle(cx,cy){
@@ -556,7 +581,7 @@ function doSparkle(cx,cy){
     const sc=pick(colors);
     sp.style.cssText=`left:${cx}px;top:${cy}px;--sd:${rnd(.7,1.1).toFixed(2)}s;--ss:${rnd(10,20).toFixed(0)}px;--sc:${sc};--sx:${r(-55,55)}px;--sy:${r(-75,-15)}px;--sdel:${(i*.07).toFixed(2)}s;`;
     document.body.appendChild(sp);
-    setTimeout(()=>sp.remove(),1600);
+    setTimeout(()=>sp.remove(),800);
   }
 }
 document.addEventListener('click',e=>doSparkle(e.clientX,e.clientY));
