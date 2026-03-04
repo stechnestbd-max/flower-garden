@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>A Garden For You 🌸</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@1,500&family=Cormorant+Garamond:ital,wght@0,300;1,400&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+html,body{
+  width:100%;height:100%;
+  overflow:hidden;
+  background:#060118;
+  font-family:'Cormorant Garamond',serif;
+  touch-action:manipulation;
+}
+
+/* Sky gradient */
+.sky{
+  position:fixed;inset:0;
+  background:linear-gradient(180deg,
+    #03000f 0%,
+    #0d0225 20%,
+    #1a0540 42%,
+    #2a0a5e 58%,
+    #1a2800 75%,
+    #0d1f00 88%,
+    #060f00 100%
+  );
+  z-index:0;
+}
+
+/* Stars */
+.stars{position:fixed;inset:0;z-index:1;pointer-events:none;}
+.star{
+  position:absolute;background:#fff;border-radius:50%;
+  animation:twinkle var(--d) ease-in-out infinite alternate;
+}
+@keyframes twinkle{from{opacity:.05}to{opacity:1}}
+
+/* Moon */
+.moon{
+  position:fixed;top:5vh;right:8vw;
+  width:clamp(40px,8vw,65px);
+  height:clamp(40px,8vw,65px);
+  background:radial-gradient(circle at 35% 35%,#fffde7,#f5d060);
+  border-radius:50%;
+  box-shadow:0 0 30px 10px rgba(245,208,96,.25),0 0 70px 25px rgba(245,208,96,.1);
+  z-index:2;
+  animation:mglow 5s ease-in-out infinite alternate;
+}
+@keyframes mglow{
+  from{box-shadow:0 0 20px 8px rgba(245,208,96,.2)}
+  to{box-shadow:0 0 50px 20px rgba(245,208,96,.38),0 0 100px 40px rgba(245,208,96,.12)}
+}
+
+/* Fireflies */
+.ff{
+  position:fixed;width:3px;height:3px;
+  background:#c8ff80;border-radius:50%;
+  box-shadow:0 0 5px 3px rgba(200,255,128,.6);
+  z-index:3;pointer-events:none;
+  animation:fly var(--t) ease-in-out infinite,fblink 1.6s ease-in-out infinite alternate;
+}
+@keyframes fly{
+  0%{transform:translate(0,0)}
+  25%{transform:translate(var(--x1),var(--y1))}
+  50%{transform:translate(var(--x2),var(--y2))}
+  75%{transform:translate(var(--x3),var(--y3))}
+  100%{transform:translate(0,0)}
+}
+@keyframes fblink{from{opacity:.04}to{opacity:1}}
+
+/* Floating petals */
+.fp{
+  position:fixed;top:-30px;pointer-events:none;z-index:4;
+  font-size:var(--fs);
+  animation:fdrop var(--fd) ease-in infinite var(--fdel);
+}
+@keyframes fdrop{
+  0%{opacity:0;transform:translateY(0) rotate(0)}
+  8%{opacity:.7}
+  92%{opacity:.3}
+  100%{opacity:0;transform:translateY(110vh) rotate(540deg) translateX(var(--fdx))}
+}
+
+/* HEADER */
+.header{
+  position:fixed;top:0;left:0;right:0;
+  z-index:20;text-align:center;
+  padding:clamp(14px,4vh,32px) 16px clamp(10px,2vh,18px);
+  background:linear-gradient(180deg,rgba(6,1,24,.85) 60%,transparent);
+  pointer-events:none;
+}
+.htitle{
+  font-family:'Playfair Display',serif;
+  font-style:italic;
+  font-size:clamp(1rem,4.5vw,1.8rem);
+  color:#fce8ff;
+  text-shadow:0 0 24px rgba(220,140,255,.8),0 2px 8px rgba(0,0,0,.6);
+  line-height:1.4;
+  margin-bottom:6px;
+}
+.hsub{
+  font-size:clamp(.75rem,3.2vw,1rem);
+  font-style:italic;font-weight:300;
+  color:rgba(235,190,255,.65);
+  letter-spacing:.05em;line-height:1.5;
+}
+.hsub em{color:#f0c8ff;font-style:italic;}
+.hdiv{
+  margin:8px auto 0;width:80px;height:1px;
+  background:linear-gradient(90deg,transparent,rgba(210,140,255,.6),transparent);
+}
+
+/* GARDEN CANVAS */
+#garden{
+  position:fixed;
+  left:0;right:0;bottom:0;
+  height:100vh;
+  z-index:5;
+  overflow:hidden;
+}
+
+/* GROUND */
+.ground{
+  position:absolute;bottom:0;left:0;right:0;
+  height:clamp(55px,12vh,90px);
+  z-index:10;
+  background:linear-gradient(180deg,
+    transparent 0%,
+    #0a2200 18%,
+    #142d00 40%,
+    #1a3800 65%,
+    #1e4000 100%
+  );
+}
+/* Grass texture top edge */
+.ground::before{
+  content:'';
+  position:absolute;top:-6px;left:0;right:0;height:14px;
+  background:
+    repeating-linear-gradient(
+      90deg,
+      transparent 0px,
+      transparent 6px,
+      #2d6a00 6px,
+      #2d6a00 8px,
+      transparent 8px,
+      transparent 12px,
+      #3d8800 12px,
+      #3d8800 14px,
+      transparent 14px,
+      transparent 18px,
+      #256000 18px,
+      #256000 20px,
+      transparent 20px
+    );
+  filter:blur(.5px);
+  opacity:.85;
+}
+/* Grass glow */
+.ground::after{
+  content:'';
+  position:absolute;top:0;left:0;right:0;height:30px;
+  background:linear-gradient(180deg,rgba(60,140,0,.18),transparent);
+}
+
+/* FLOWERS */
+.flower{
+  position:absolute;
+  bottom:0;
+  left:var(--fx);
+  display:flex;flex-direction:column;align-items:center;
+  transform-origin:bottom center;
+  opacity:0;
+  animation:grow var(--gd,.9s) cubic-bezier(.34,1.56,.64,1) forwards var(--gdel,0s);
+  z-index:var(--fz,6);
+}
+@keyframes grow{
+  from{opacity:0;transform:scaleY(0)}
+  to{opacity:1;transform:scaleY(1)}
+}
+
+/* STEM */
+.stem{
+  width:var(--sw,2px);
+  height:var(--sh,60px);
+  background:linear-gradient(180deg,#4caf50,#2e7d32);
+  border-radius:2px;position:relative;flex-shrink:0;
+}
+.stem.la::after{
+  content:'';position:absolute;
+  top:32%;right:-8px;
+  width:10px;height:6px;
+  background:#4caf50;
+  border-radius:0 50% 50% 0;
+  transform:rotate(-18deg);
+}
+.stem.lb::before{
+  content:'';position:absolute;
+  top:56%;left:-8px;
+  width:9px;height:5px;
+  background:#3d9140;
+  border-radius:50% 0 0 50%;
+  transform:rotate(14deg);
+}
+
+/* HEAD */
+.fhead{
+  position:relative;flex-shrink:0;
+  animation:
+    sway var(--swd,4s) ease-in-out infinite var(--swdel,0s),
+    bloom var(--bd2,.7s) ease forwards var(--bdel,.5s);
+  transform:scale(0);
+}
+@keyframes sway{
+  0%,100%{transform:rotate(var(--sn,-3deg))}
+  50%{transform:rotate(var(--sp,3deg))}
+}
+@keyframes bloom{
+  from{transform:scale(0) rotate(-12deg)}
+  to{transform:scale(1) rotate(0)}
+}
+
+/* PETALS */
+.petal{
+  position:absolute;top:50%;left:50%;
+  width:var(--pw,16px);height:var(--ph,24px);
+  background:var(--pc,#ff9cca);
+  border-radius:50% 50% 50% 50%/60% 60% 40% 40%;
+  transform-origin:bottom center;
+  transform:translateX(-50%) rotate(calc(var(--i)*var(--ang,40deg))) translateY(-100%);
+  box-shadow:inset 0 -3px 5px rgba(0,0,0,.12),inset 1px 1px 4px rgba(255,255,255,.2);
+  filter:drop-shadow(0 0 3px var(--pg,rgba(255,150,200,.4)));
+}
+.petal.rnd{border-radius:50%;height:var(--pw,16px)}
+.petal.nrw{width:calc(var(--pw,16px)*.55);border-radius:50% 50% 30% 30%}
+.petal.wde{width:calc(var(--pw,16px)*1.35);border-radius:60% 60% 40% 40%}
+
+/* CENTER */
+.fcenter{
+  position:absolute;top:50%;left:50%;
+  transform:translate(-50%,-50%);
+  width:var(--cw,12px);height:var(--cw,12px);
+  background:radial-gradient(circle at 35% 35%,var(--c1,#fff176),var(--c2,#f9a825));
+  border-radius:50%;
+  box-shadow:0 0 5px var(--cgl,rgba(255,200,50,.6));
+  z-index:2;
+}
+
+/* TULIP */
+.tulip-cup{
+  position:relative;flex-shrink:0;
+  animation:
+    sway var(--swd,4.5s) ease-in-out infinite var(--swdel,0s),
+    bloom var(--bd2,.8s) ease forwards var(--bdel,.5s);
+  transform:scale(0);
+}
+.tulip-p{
+  position:absolute;bottom:0;
+  border-radius:50% 50% 10% 10%;
+  box-shadow:inset 2px 2px 5px rgba(255,255,255,.18);
+}
+
+/* LAVENDER */
+.lav-body{
+  display:flex;flex-direction:column;align-items:center;
+  animation:
+    sway var(--swd,4s) ease-in-out infinite var(--swdel,0s),
+    bloom var(--bd2,.8s) ease forwards var(--bdel,.5s);
+  transform:scale(0);flex-shrink:0;
+}
+.lav-bud{
+  border-radius:50% 50% 30% 30%;
+  animation:budP 2s ease-in-out infinite alternate var(--bd,0s);
+}
+@keyframes budP{from{transform:scale(.88);filter:brightness(.88)}to{transform:scale(1.12);filter:brightness(1.2)}}
+
+/* SPARKLE */
+.spark{
+  position:fixed;pointer-events:none;z-index:30;
+  font-size:var(--ss,13px);color:var(--sc,#ffd700);
+  text-shadow:0 0 5px var(--sc,#ffd700);
+  animation:sparkA var(--sd,.9s) ease-out forwards var(--sdel,0s);
+}
+@keyframes sparkA{
+  0%{opacity:1;transform:translate(0,0) scale(0)}
+  50%{opacity:1;transform:translate(var(--sx,0),var(--sy,-25px)) scale(1)}
+  100%{opacity:0;transform:translate(calc(var(--sx,0)*1.6),calc(var(--sy,-25px)*2.2)) scale(.2)}
+}
+
+/* Orbs */
+.orb{
+  position:fixed;border-radius:50%;filter:blur(70px);
+  pointer-events:none;z-index:0;
+  animation:orbP var(--ot,7s) ease-in-out infinite alternate;
+}
+@keyframes orbP{from{opacity:.1}to{opacity:.28}}
+</style>
+</head>
+<body>
+
+<div class="sky"></div>
+<div class="stars" id="stars"></div>
+<div class="moon"></div>
+<div id="fpetals"></div>
+
+<!-- Orbs -->
+<div class="orb" style="width:min(400px,80vw);height:min(400px,80vw);background:#4a0080;top:-15%;left:-15%;--ot:8s"></div>
+<div class="orb" style="width:min(280px,60vw);height:min(280px,60vw);background:#003800;bottom:5%;right:-10%;--ot:6s"></div>
+<div class="orb" style="width:min(180px,40vw);height:min(180px,40vw);background:#600070;top:35%;left:40%;--ot:10s"></div>
+
+<div class="header">
+  <div class="htitle">🌸 This flower garden is for you 🌸</div>
+  <div class="hdiv"></div>
+  <div class="hsub">
+    because you don't deserve a single flower —<br>
+    <em>you deserve the whole garden.</em>
+  </div>
+</div>
+
+<div id="garden">
+  <!-- Ground with grass -->
+  <div class="ground"></div>
+</div>
+
+<script>
+// Stars
+const starsEl=document.getElementById('stars');
+for(let i=0;i<120;i++){
+  const s=document.createElement('div');s.className='star';
+  const sz=Math.random()*2+.4;
+  s.style.cssText=`width:${sz}px;height:${sz}px;top:${Math.random()*80}%;left:${Math.random()*100}%;--d:${(Math.random()*3+1.2).toFixed(1)}s;animation-delay:${(Math.random()*5).toFixed(1)}s`;
+  starsEl.appendChild(s);
+}
+
+// Floating petals
+const fpe=document.getElementById('fpetals');
+['🌸','🌺','🌼','✿','❀','💮'].forEach(em=>{
+  for(let j=0;j<4;j++){
+    const p=document.createElement('div');p.className='fp';p.textContent=em;
+    p.style.cssText=`left:${Math.random()*100}%;--fs:${(Math.random()*7+8)}px;--fd:${(Math.random()*9+8).toFixed(1)}s;--fdel:${(Math.random()*14).toFixed(1)}s;--fdx:${(Math.random()*80-40).toFixed(0)}px`;
+    fpe.appendChild(p);
+  }
+});
+
+// Fireflies
+for(let i=0;i<14;i++){
+  const ff=document.createElement('div');ff.className='ff';
+  ff.style.cssText=`left:${Math.random()*90+5}%;top:${Math.random()*55+5}%;--t:${(Math.random()*7+5).toFixed(1)}s;--x1:${r(-50,50)}px;--y1:${r(-40,40)}px;--x2:${r(-50,50)}px;--y2:${r(-40,40)}px;--x3:${r(-50,50)}px;--y3:${r(-40,40)}px;animation-delay:${(Math.random()*6).toFixed(1)}s`;
+  document.body.appendChild(ff);
+}
+
+function r(a,b){return Math.round(Math.random()*(b-a)+a);}
+function rnd(a,b){return Math.random()*(b-a)+a;}
+function pick(a){return a[Math.floor(Math.random()*a.length)];}
+
+// Detect mobile
+const isMobile=window.innerWidth<=600;
+const W=window.innerWidth;
+const H=window.innerHeight;
+const groundH=Math.min(90,Math.max(55,H*.11));
+
+// Palettes [color, glow, center1, center2]
+const pal={
+  pink:  ['#ff9cca','rgba(255,156,202,.5)','#fff0f8','#c2185b'],
+  rose:  ['#ff4d6d','rgba(255,77,109,.5)', '#ffd6dd','#b71c1c'],
+  purple:['#c084fc','rgba(192,132,252,.5)','#ede9fe','#6d28d9'],
+  violet:['#a78bfa','rgba(167,139,250,.5)','#ddd6fe','#4c1d95'],
+  yellow:['#fbbf24','rgba(251,191,36,.5)', '#fefce8','#92400e'],
+  orange:['#fb923c','rgba(251,146,60,.5)', '#fff7ed','#9a3412'],
+  cyan:  ['#67e8f9','rgba(103,232,249,.5)','#ecfeff','#0e7490'],
+  green: ['#86efac','rgba(134,239,172,.5)','#f0fdf4','#14532d'],
+  white: ['#f1f5f9','rgba(241,245,249,.4)','#ffffff','#475569'],
+  peach: ['#fda4af','rgba(253,164,175,.5)','#fff1f2','#9f1239'],
+  mint:  ['#6ee7b7','rgba(110,231,183,.5)','#ecfdf5','#064e3b'],
+  lilac: ['#e879f9','rgba(232,121,249,.5)','#fdf4ff','#701a75'],
+  coral: ['#f97316','rgba(249,115,22,.5)', '#fff7ed','#7c2d12'],
+  sky:   ['#7dd3fc','rgba(125,211,252,.5)','#f0f9ff','#075985'],
+  lemon: ['#fef08a','rgba(254,240,138,.5)','#fefce8','#713f12'],
+  blush: ['#fca5a5','rgba(252,165,165,.5)','#fef2f2','#991b1b'],
+};
+const pKeys=Object.keys(pal);
+
+// Rows: bottom offset from floor (px), zIndex, scale
+// ground height ~groundH, flowers root at 0 from garden bottom
+// ground covers bottom groundH px, so flowers need to be taller than groundH
+const rows=[
+  {by:groundH-4, z:6,  sMin:.22,sMax:.38},
+  {by:groundH-2, z:7,  sMin:.28,sMax:.44},
+  {by:groundH,   z:8,  sMin:.34,sMax:.52},
+  {by:groundH+2, z:9,  sMin:.40,sMax:.60},
+  {by:groundH+5, z:10, sMin:.48,sMax:.70},
+  {by:groundH+8, z:11, sMin:.58,sMax:.82},
+  {by:groundH+12,z:12, sMin:.68,sMax:.95},
+];
+
+const types=['daisy','daisy','daisy','tulip','tulip','sunflower','lavender','cherry','poppy','daisy','daisy','tulip'];
+
+function makePetal(i,cnt,pw,ph,pc,pg,cls=''){
+  const p=document.createElement('div');
+  p.className='petal'+(cls?' '+cls:'');
+  p.style.cssText=`--i:${i};--ang:${360/cnt}deg;--pw:${pw}px;--ph:${ph}px;--pc:${pc};--pg:${pg};`;
+  return p;
+}
+function makeCenter(cw,c1,c2,cgl){
+  const c=document.createElement('div');c.className='fcenter';
+  c.style.cssText=`--cw:${cw}px;--c1:${c1};--c2:${c2};--cgl:${cgl};`;
+  return c;
+}
+function makeStem(sw,sh,cls=''){
+  const s=document.createElement('div');
+  s.className='stem'+(cls?' '+cls:'');
+  s.style.cssText=`--sw:${sw}px;--sh:${sh}px;`;
+  return s;
+}
+
+function buildFlower(type,scale,colKey,delay){
+  const p=pal[colKey];
+  const pc=p[0],pg=p[1],c1=p[2],c2=p[3];
+  const sw=Math.max(1,Math.round(2*scale));
+  // stem height: must reach above ground
+  const minStem=groundH+10;
+  const sh=Math.max(minStem, Math.round(rnd(55,110)*scale));
+  const hw=Math.round(rnd(20,38)*scale);
+  const bdel=delay+rnd(.2,.7);
+  const swd=rnd(3,7).toFixed(1);
+  const swdel=rnd(0,3).toFixed(1);
+  const sn=(-rnd(2,5)).toFixed(1);
+  const sp=rnd(2,5).toFixed(1);
+  const bd2=rnd(.5,.9).toFixed(1);
+
+  const wrap=document.createElement('div');
+  wrap.className='flower';
+
+  const hcss=`width:${hw}px;height:${hw}px;--swd:${swd}s;--swdel:${swdel}s;--bdel:${bdel}s;--bd2:${bd2}s;--sn:${sn}deg;--sp:${sp}deg;`;
+
+  if(type==='daisy'||type==='cosmos'){
+    const cnt=pick([7,8,9,10,12]);
+    const v=pick(['','rnd','nrw','wde']);
+    const pw=Math.round(hw*.48),ph=Math.round(hw*.72),cw=Math.round(hw*.32);
+    const head=document.createElement('div');head.className='fhead';head.style.cssText=hcss;
+    for(let i=0;i<cnt;i++) head.appendChild(makePetal(i,cnt,pw,ph,pc,pg,v));
+    head.appendChild(makeCenter(cw,c1,c2,pg));
+    wrap.appendChild(head);
+    wrap.appendChild(makeStem(sw,sh,'la lb'));
+
+  }else if(type==='poppy'){
+    const cnt=pick([5,6]);
+    const pw=Math.round(hw*.65),ph=Math.round(hw*.75),cw=Math.round(hw*.28);
+    const head=document.createElement('div');head.className='fhead';head.style.cssText=hcss;
+    for(let i=0;i<cnt;i++) head.appendChild(makePetal(i,cnt,pw,ph,pc,pg,'wde'));
+    head.appendChild(makeCenter(cw,'#222','#111',pg));
+    wrap.appendChild(head);
+    wrap.appendChild(makeStem(sw,sh,'la'));
+
+  }else if(type==='tulip'){
+    const tw=Math.round(hw*.85),th=Math.round(hw*1.1);
+    const cup=document.createElement('div');cup.className='tulip-cup';
+    cup.style.cssText=`width:${tw}px;height:${th}px;--swd:${swd}s;--swdel:${swdel}s;--bdel:${bdel}s;--bd2:${bd2}s;`;
+    [{l:0,w:Math.round(tw*.52),h:Math.round(th*.84),rot:-28},
+     {l:Math.round(tw*.24),w:Math.round(tw*.52),h:th,rot:0},
+     {l:Math.round(tw*.47),w:Math.round(tw*.52),h:Math.round(th*.84),rot:28}].forEach(d=>{
+      const tp=document.createElement('div');tp.className='tulip-p';
+      tp.style.cssText=`left:${d.l}px;width:${d.w}px;height:${d.h}px;background:${pc};transform:rotate(${d.rot}deg);filter:drop-shadow(0 0 4px ${pg});`;
+      cup.appendChild(tp);
+    });
+    wrap.appendChild(cup);
+    wrap.appendChild(makeStem(sw+1,sh,'la'));
+
+  }else if(type==='sunflower'){
+    const cnt=pick([13,14,16]);
+    const pw=Math.round(hw*.38),ph=Math.round(hw*.62),cw=Math.round(hw*.44);
+    const head=document.createElement('div');head.className='fhead';
+    head.style.cssText=`width:${hw}px;height:${hw}px;--swd:${rnd(6,9).toFixed(1)}s;--swdel:${swdel}s;--bdel:${bdel}s;--bd2:.9s;--sn:${sn}deg;--sp:${sp}deg;`;
+    for(let i=0;i<cnt;i++) head.appendChild(makePetal(i,cnt,pw,ph,'#fbbf24','rgba(251,191,36,.5)'));
+    const cen=document.createElement('div');cen.className='fcenter';
+    cen.style.cssText=`--cw:${cw}px;background:radial-gradient(circle at 30% 30%,#7d5a2a,#3d2408);box-shadow:0 0 6px rgba(80,50,20,.5);`;
+    head.appendChild(cen);
+    wrap.appendChild(head);
+    wrap.appendChild(makeStem(sw+1,Math.round(sh*1.1),'la lb'));
+
+  }else if(type==='lavender'){
+    const cnt=pick([5,6,7,8]);
+    const lp=pal[pick(['purple','violet','lilac'])];
+    const body=document.createElement('div');body.className='lav-body';
+    body.style.cssText=`gap:${Math.max(1,Math.round(2*scale))}px;--swd:${swd}s;--swdel:${swdel}s;--bdel:${bdel}s;--bd2:${bd2}s;--sn:${sn}deg;--sp:${sp}deg;`;
+    for(let i=0;i<cnt;i++){
+      const bud=document.createElement('div');bud.className='lav-bud';
+      const bs=Math.round((11-i)*scale*.9+2);
+      bud.style.cssText=`width:${bs}px;height:${Math.round(bs*1.25)}px;--bd:${(i*.14).toFixed(2)}s;background:radial-gradient(circle,${lp[2]},${lp[0]});box-shadow:0 0 5px ${lp[1]};`;
+      body.appendChild(bud);
+    }
+    const st=document.createElement('div');st.className='stem';
+    st.style.cssText=`--sw:${sw}px;--sh:${sh}px;background:linear-gradient(180deg,${lp[0]},#4caf50 55%);`;
+    wrap.appendChild(body);
+    wrap.appendChild(st);
+
+  }else if(type==='cherry'){
+    const cnt=pick([5,6,7]);
+    const cp=pal[pick(['pink','peach','blush','white'])];
+    const pw=Math.round(hw*.48),ph=Math.round(hw*.48),cw=Math.round(hw*.24);
+    const head=document.createElement('div');head.className='fhead';head.style.cssText=hcss;
+    for(let i=0;i<cnt;i++) head.appendChild(makePetal(i,cnt,pw,ph,cp[0],cp[1],'rnd'));
+    head.appendChild(makeCenter(cw,'#ffcdd2','#f06292',cp[1]));
+    wrap.appendChild(head);
+    wrap.appendChild(makeStem(sw,sh,'la'));
+  }
+
+  return wrap;
+}
+
+const garden=document.getElementById('garden');
+let total=0;
+const MAX=500;
+
+function spawnOne(delay){
+  if(total>=MAX)return;
+  const row=rows[Math.floor(Math.random()*rows.length)];
+  const scale=rnd(row.sMin,row.sMax);
+  const colKey=pKeys[Math.floor(Math.random()*pKeys.length)];
+  const type=types[Math.floor(Math.random()*types.length)];
+  const leftPct=rnd(.5,98.5);
+
+  const el=buildFlower(type,scale,colKey,delay);
+  el.style.setProperty('--fx',leftPct+'%');
+  el.style.setProperty('--fz',row.z);
+  el.style.setProperty('--gdel',delay+'s');
+  el.style.setProperty('--gd',rnd(.6,1.2).toFixed(2)+'s');
+  el.style.bottom='0';
+  if(Math.random()>.5) el.style.transform='scaleX(-1)';
+
+  garden.appendChild(el);
+  total++;
+}
+
+// Initial burst
+for(let i=0;i<180;i++) spawnOne(rnd(.1,9));
+
+// Continuous waves
+function wave(){
+  const batch=r(5,14);
+  for(let i=0;i<batch;i++) setTimeout(()=>spawnOne(rnd(0,1.2)),i*rnd(50,220));
+  setTimeout(wave, total<250?rnd(700,1300):rnd(1200,2600));
+}
+setTimeout(wave,9500);
+
+// Touch/click sparkle
+function doSparkle(cx,cy){
+  const colors=['#ffd700','#ff9cca','#c084fc','#86efac','#fbbf24','#67e8f9','#fda4af'];
+  const chars=['✦','✧','❋','✿','✽','❃','⁕','✺','❀'];
+  for(let i=0;i<7;i++){
+    const sp=document.createElement('div');sp.className='spark';
+    sp.textContent=pick(chars);
+    const sc=pick(colors);
+    sp.style.cssText=`left:${cx}px;top:${cy}px;--sd:${rnd(.7,1.1).toFixed(2)}s;--ss:${rnd(10,20).toFixed(0)}px;--sc:${sc};--sx:${r(-55,55)}px;--sy:${r(-75,-15)}px;--sdel:${(i*.07).toFixed(2)}s;`;
+    document.body.appendChild(sp);
+    setTimeout(()=>sp.remove(),1600);
+  }
+}
+document.addEventListener('click',e=>doSparkle(e.clientX,e.clientY));
+document.addEventListener('touchstart',e=>{
+  const t=e.touches[0];
+  doSparkle(t.clientX,t.clientY);
+},{passive:true});
+</script>
+</body>
+</html>
